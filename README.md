@@ -323,6 +323,6 @@ Connect and unlock the iPhone, accept **Trust This Computer**, then verify the d
 pymobiledevice3 usbmux list --usb
 ```
 
-Open `/tools/lab` on the dashboard, use `http://127.0.0.1:8787` as the helper URL, and enter the same token. The helper provides read-only USB discovery and metadata-only IPSW inspection. It does not expose arbitrary shell commands or extract/modify firmware components. Details and tests: [device-helper/README.md](device-helper/README.md).
+Open `/tools/lab` on the dashboard, use `http://127.0.0.1:8787` as the helper URL, and enter the same token. The helper provides read-only USB discovery, allowlisted iOS lockdown metadata, and metadata-only IPSW inspection. It does not expose arbitrary shell commands or extract/modify firmware components. Details and tests: [device-helper/README.md](device-helper/README.md).
 
 The helper is local-only by default. Do not expose port 8787 to the public internet. Browser private-network permissions and CORS settings may vary by browser/deployment origin. Automated tests mock USB discovery and do not substitute for testing with a connected physical iPhone.
