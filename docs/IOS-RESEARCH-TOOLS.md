@@ -56,12 +56,12 @@ Halaman `/tools` kini dirancang sebagai satu workspace dengan pencarian dan filt
 3. **IPSW inspector** — rancangan pemeriksaan metadata firmware secara lokal/offline.
 4. **Protocol library** — katalog upstream, status review, dan catatan kompatibilitas.
 
-**Status implementasi:** UI workspace dan filter katalog tersedia; koneksi perangkat, diagnostik live, parsing IPSW, dan eksekusi binary native belum diimplementasikan. Angka dan label pada ringkasan UI adalah status katalog/rancangan, bukan hasil pemindaian perangkat.
+**Status implementasi saat ini:** UI workspace dan katalog tersedia. Helper lokal di `device-helper/` menyediakan discovery USB read-only melalui `pymobiledevice3 usbmux list --usb` serta inspeksi metadata IPSW (BuildManifest, versi/build, product types, daftar komponen, ukuran, SHA-256). Fitur tersebut memerlukan helper berjalan di komputer operator; belum ada hasil pemindaian perangkat fisik yang diklaim.
 
 ### Arsitektur tahap berikutnya
 
 - **Web UI (Next.js):** hanya mengirim permintaan terstruktur ke endpoint helper yang sudah diautentikasi; jangan menerima shell command bebas.
-- **Local device helper:** proses terpisah di komputer operator, dipasang dan dijalankan secara eksplisit. Mulai dengan operasi read-only seperti daftar perangkat yang terpairing dan metadata dasar.
+- **Local device helper:** proses Flask terpisah di komputer operator. Endpoint `/api/devices` memanggil hanya perintah tetap `pymobiledevice3 usbmux list --usb` dengan timeout dan `shell=False`; endpoint `/api/firmware/inspect` hanya membaca metadata ZIP/IPSW dan tidak mengekstrak atau mengubah firmware.
 - **Firmware inspector:** proses lokal terisolasi, batas ukuran file, validasi tipe, timeout, dan tanpa unggah firmware ke server publik secara default.
 - **Safety controls:** pairing/kepercayaan harus disetujui pengguna, autentikasi lokal, allowlist operasi, audit log yang meredaksi data sensitif, dan pemisahan dari endpoint MDM.
 - **Tidak didukung:** bypass Activation Lock/iCloud, penghapusan status aktivasi, patch `mobileactivationd` untuk menghindari aktivasi, atau otomatisasi rantai eksploit.

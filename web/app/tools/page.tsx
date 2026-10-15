@@ -41,9 +41,9 @@ const categories = [
 ] as const;
 
 const modules = [
-  { number: "01", title: "Device overview", description: "Area kerja untuk inventaris perangkat, versi iOS, identitas model, dan status koneksi.", status: "Menunggu helper lokal" },
-  { number: "02", title: "Diagnostics", description: "Ruang kerja untuk hasil diagnostik yang aman dan tindakan yang diotorisasi.", status: "Rancangan UI" },
-  { number: "03", title: "IPSW inspector", description: "Rencana pemeriksaan metadata dan arsip firmware secara lokal/offline.", status: "Belum diimplementasikan" },
+  { number: "01", title: "Device overview", description: "Discovery perangkat USB melalui pymobiledevice3 dari komputer lokal.", status: "Tersedia di /tools/lab; perlu helper lokal" },
+  { number: "02", title: "Diagnostics", description: "Baca metadata lockdown iOS melalui koneksi USB yang telah dipercaya.", status: "Tersedia di /tools/lab; perlu helper lokal" },
+  { number: "03", title: "IPSW inspector", description: "Baca BuildManifest, versi produk/build, model yang didukung, daftar komponen dan SHA-256.", status: "Metadata-only di /tools/lab; perlu helper lokal" },
   { number: "04", title: "Protocol library", description: "Indeks library upstream, dukungan platform, lisensi, dan status review.", status: "Katalog tersedia" },
 ];
 
@@ -68,7 +68,8 @@ export default function ToolsPage() {
         </a>
         <nav aria-label="Navigasi toolkit" style={{ display: "flex", flexWrap: "wrap", gap: "0.7rem" }}>
           <a className="button button-secondary" href="/">Beranda MDM</a>
-          <a className="button button-secondary" href="https://github.com/Strong-Bee/mdm_server/blob/main/docs/IOS-RESEARCH-TOOLS.md" target="_blank" rel="noreferrer">Dokumentasi ↗</a>
+          <a className="button button-primary" href="/tools/lab">Buka Device Lab ↗</a>
+          <a className="button button-secondary" href="https://github.com/Strong-Bee/mdm_server/blob/main/device-helper/README.md" target="_blank" rel="noreferrer">Setup helper ↗</a>
         </nav>
       </header>
 
@@ -76,12 +77,13 @@ export default function ToolsPage() {
         <p className="eyebrow">UNIFIED IPHONE WORKSPACE</p>
         <h1 style={{ fontSize: "clamp(2rem, 5vw, 3.4rem)", lineHeight: 1.05, margin: "0.5rem 0 1rem" }}>Satu workspace untuk<br />diagnostik dan riset iPhone.</h1>
         <p className="hero-description" style={{ maxWidth: "780px" }}>
-          Satu antarmuka untuk modul diagnostik perangkat, inspeksi firmware offline, dokumentasi protokol, dan referensi open-source. Koneksi perangkat fisik dan pemrosesan firmware belum aktif pada halaman ini.
+          Satu antarmuka untuk katalog, discovery iPhone melalui helper lokal, dan inspeksi metadata IPSW offline. Discovery dan inspeksi memerlukan helper terpasang di komputer yang terhubung USB.
         </p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "0.65rem", marginTop: "1.25rem" }}>
           <span style={{ border: "1px solid var(--line, #263247)", borderRadius: "999px", padding: "0.4rem 0.7rem", fontSize: "0.85rem" }}>● UI aktif</span>
-          <span style={{ border: "1px solid var(--line, #263247)", borderRadius: "999px", padding: "0.4rem 0.7rem", fontSize: "0.85rem" }}>Perangkat: belum terhubung</span>
-          <span style={{ border: "1px solid var(--line, #263247)", borderRadius: "999px", padding: "0.4rem 0.7rem", fontSize: "0.85rem" }}>Native tools: belum dipasang</span>
+          <a className="button button-primary" href="/tools/lab">Buka Device Lab</a>
+          <span style={{ border: "1px solid var(--line, #263247)", borderRadius: "999px", padding: "0.4rem 0.7rem", fontSize: "0.85rem" }}>Perangkat: belum dipindai</span>
+          <span style={{ border: "1px solid var(--line, #263247)", borderRadius: "999px", padding: "0.4rem 0.7rem", fontSize: "0.85rem" }}>Helper lokal: perlu dijalankan</span>
         </div>
       </section>
 
@@ -140,8 +142,8 @@ export default function ToolsPage() {
 
       <aside style={{ ...panel, borderColor: "rgba(230, 170, 60, 0.5)" }}>
         <h2 style={{ marginTop: 0 }}>Batasan implementasi</h2>
-        <p style={{ marginBottom: "0.5rem" }}>Halaman ini merupakan workspace UI dan katalog, bukan executable toolchain. Browser/Vercel tidak dapat mengakses layanan USB iPhone atau menjalankan binary native secara langsung.</p>
-        <p style={{ marginBottom: 0 }}>Tahap berikutnya untuk diagnostik nyata adalah helper lokal terautentikasi dengan allowlist perintah, pairing yang disetujui pengguna, audit log, timeout, dan pemrosesan firmware offline. Fitur bypass Activation Lock, penghapusan status aktivasi, atau patch untuk menghindari aktivasi tidak disediakan.</p>
+        <p style={{ marginBottom: "0.5rem" }}>Device Lab sekarang memiliki integrasi nyata ke helper lokal untuk discovery USB melalui pymobiledevice3 dan inspeksi metadata IPSW. Fitur ini baru dapat dipakai setelah helper dipasang dan dijalankan pada komputer yang terhubung ke iPhone.</p>
+        <p style={{ marginBottom: 0 }}>Eksekusi native dari browser tetap tidak tersedia: helper lokal adalah proses terpisah dengan token dan CORS origin allowlist. IPSW dipindai metadata saja; tidak ada ekstraksi komponen atau patch firmware pada endpoint ini.</p>
       </aside>
     </main>
   );
