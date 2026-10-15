@@ -1,51 +1,51 @@
-# Apple iOS/iPadOS MDM Server
+# Server MDM Apple iOS/iPadOS
 
-A Python/Flask implementation baseline for experimenting with Apple's Mobile Device Management (MDM) protocol for **authorized iPhone and iPad administration**.
+Implementasi dasar protokol **Mobile Device Management (MDM)** Apple menggunakan Python dan Flask untuk eksperimen serta administrasi iPhone dan iPad yang **sah dan telah mendapat izin**.
 
-> **Status: experimental — not production-ready.** This repository is not a complete Apple MDM product. Do not expose it to the public internet or enroll real devices until enrollment trust, TLS, authorization, command validation, and end-to-end testing are complete.
+> **Status: eksperimental — belum siap untuk produksi.** Repositori ini belum merupakan produk MDM Apple yang lengkap. Jangan membuka server ke internet publik atau mendaftarkan perangkat nyata sebelum kepercayaan proses enrollment, TLS, otorisasi, validasi perintah, dan pengujian menyeluruh diselesaikan.
 
-## Scope
+## Ruang lingkup
 
-The project is intended for Apple iOS/iPadOS devices and includes an initial implementation of:
+Proyek ini ditujukan untuk perangkat Apple iOS/iPadOS dan mencakup implementasi awal berikut:
 
-- Apple plist-based check-in handling for `Authenticate`, `TokenUpdate`, and `CheckOut`.
-- An MDM command connection endpoint that returns queued commands as plist responses.
-- SQLite storage for device identifiers, enrollment/push metadata, basic inventory fields, and command status.
-- APNs MDM push notification support using environment-provided credentials.
-- Token-protected administrative API endpoints.
-- Basic Python unit tests and GitHub Actions CI.
+- Menangani pesan check-in Apple berbasis plist: `Authenticate`, `TokenUpdate`, dan `CheckOut`.
+- Endpoint koneksi perintah MDM yang mengembalikan perintah dalam antrean sebagai respons plist.
+- Penyimpanan SQLite untuk pengenal perangkat, metadata enrollment/push, informasi inventaris dasar, dan status perintah.
+- Dukungan notifikasi push MDM melalui APNs menggunakan kredensial yang diberikan melalui variabel lingkungan.
+- Endpoint API administrasi yang dilindungi token.
+- Pengujian unit Python dasar dan CI melalui GitHub Actions.
 
-### Important limitations
+### Batasan penting
 
-This is a protocol baseline, not a production-complete MDM server. In particular:
+Proyek ini merupakan dasar implementasi protokol, bukan server MDM lengkap yang siap produksi. Hal-hal berikut masih perlu diselesaikan:
 
-- Enrollment profile generation/signing and verification are not implemented as a complete enrollment workflow.
-- Device identity and MDM client-certificate validation must be implemented and verified at the TLS/reverse-proxy boundary before public deployment.
-- Apple command payloads and responses need complete schema validation and broader protocol coverage.
-- APNs behavior needs integration testing with valid Apple-issued credentials and an enrolled device.
-- The current tests are smoke tests; they do not replace end-to-end testing on a real iPhone/iPad.
-- Activation Lock bypass is **not implemented** and is not promised by this project.
+- Pembuatan, penandatanganan, dan verifikasi profil enrollment belum tersedia sebagai alur enrollment yang lengkap.
+- Validasi identitas perangkat dan sertifikat klien MDM harus diterapkan serta diverifikasi pada lapisan TLS/proxy terbalik sebelum server boleh diakses publik.
+- Payload dan respons perintah Apple memerlukan validasi skema yang lengkap serta cakupan protokol yang lebih luas.
+- Perilaku APNs perlu diuji dengan kredensial resmi Apple yang valid dan perangkat yang telah terdaftar.
+- Pengujian saat ini masih berupa pengujian dasar; pengujian tersebut tidak menggantikan pengujian menyeluruh pada iPhone/iPad nyata.
+- Fitur bypass Activation Lock **tidak tersedia** dan tidak dijanjikan oleh proyek ini.
 
-## Architecture
+## Arsitektur
 
-Typical Apple MDM communication has two distinct paths:
+Komunikasi MDM Apple umumnya memiliki dua jalur berbeda:
 
-1. **Check-in service** — the device reports enrollment/check-in messages to `/checkin`.
-2. **MDM command service** — APNs wakes the device; the device connects to `/mdm` to retrieve queued commands and report their results.
+1. **Layanan check-in** — perangkat mengirim pesan enrollment/check-in ke endpoint `/checkin`.
+2. **Layanan perintah MDM** — APNs membangunkan perangkat; perangkat kemudian terhubung ke endpoint `/mdm` untuk mengambil perintah yang mengantre dan melaporkan hasilnya.
 
-APNs is a wake-up signal, not the channel that carries the command payload itself. The device connects to the MDM server to fetch commands.
+APNs hanya berfungsi sebagai sinyal untuk membangunkan perangkat, bukan sebagai saluran yang membawa isi perintah. Perangkat terhubung ke server MDM untuk mengambil perintah.
 
-## Requirements
+## Persyaratan
 
-- Python 3.11 or later (CI currently targets Python 3.11).
-- Dependencies from `requirements.txt`.
-- A persistent writable directory for the SQLite database.
-- For real device push notifications: valid Apple MDM/APNs configuration and credentials.
-- HTTPS with a valid certificate for any device-facing deployment.
+- Python 3.11 atau lebih baru (CI saat ini menggunakan Python 3.11).
+- Dependensi yang tercantum dalam `requirements.txt`.
+- Direktori permanen yang dapat ditulisi untuk basis data SQLite.
+- Untuk notifikasi push ke perangkat nyata: konfigurasi dan kredensial APNs/MDM Apple yang valid.
+- HTTPS dengan sertifikat yang valid untuk setiap deployment yang melayani perangkat.
 
-## Local setup
+## Menjalankan secara lokal
 
-### 1. Clone and install
+### 1. Kloning repositori dan instal dependensi
 
 ```bash
 git clone https://github.com/Strong-Bee/mdm_server.git
@@ -53,29 +53,32 @@ cd mdm_server
 python -m venv .venv
 ```
 
-Activate the environment:
+Aktifkan lingkungan virtual:
 
 **Linux/macOS**
+
 ```bash
 source .venv/bin/activate
 ```
 
 **Windows PowerShell**
+
 ```powershell
-.venv\Scripts\Activate.ps1
+.venv\\Scripts\\Activate.ps1
 ```
 
-Install dependencies:
+Instal dependensi:
 
 ```bash
 python -m pip install -r requirements.txt
 ```
 
-### 2. Configure environment variables
+### 2. Atur variabel lingkungan
 
-Set a unique, strong secret and an administrative token. Do not commit real secrets to Git.
+Buat secret dan token administrator yang kuat serta unik. Jangan pernah memasukkan secret asli ke Git.
 
 **Linux/macOS**
+
 ```bash
 export FLASK_SECRET_KEY="$(python -c 'import secrets; print(secrets.token_hex(32))')"
 export MDM_ADMIN_TOKEN="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
@@ -85,45 +88,46 @@ export PORT="8000"
 ```
 
 **Windows PowerShell**
+
 ```powershell
 $env:FLASK_SECRET_KEY = python -c "import secrets; print(secrets.token_hex(32))"
 $env:MDM_ADMIN_TOKEN = python -c "import secrets; print(secrets.token_urlsafe(32))"
-$env:MDM_DATABASE_PATH = "$PWD\mdm.db"
+$env:MDM_DATABASE_PATH = "$PWD\\mdm.db"
 $env:MDM_HOST = "127.0.0.1"
 $env:PORT = "8000"
 ```
 
-For APNs, configure the values required by `apns_push.py`:
+Untuk APNs, atur variabel yang dibutuhkan oleh `apns_push.py`:
 
 - `APNS_TEAM_ID`
 - `APNS_KEY_ID`
-- `APNS_AUTH_KEY_PATH` — path to the Apple-issued APNs authentication key file
-- `APNS_USE_SANDBOX` — `true` only when the environment and token are configured for the APNs sandbox; otherwise `false`
+- `APNS_AUTH_KEY_PATH` — lokasi berkas kunci autentikasi APNs yang diterbitkan Apple.
+- `APNS_USE_SANDBOX` — gunakan `true` hanya jika lingkungan dan token dikonfigurasi untuk APNs sandbox; selain itu gunakan `false`.
 
-Keep the APNs key outside the repository and restrict file permissions. APNs credentials and device tokens must be handled as secrets.
+Simpan kunci APNs di luar repositori dan batasi izin akses berkasnya. Kredensial APNs dan token perangkat harus diperlakukan sebagai informasi rahasia.
 
-### 3. Start the server
+### 3. Jalankan server
 
 ```bash
 python main.py
 ```
 
-The default bind address is `127.0.0.1:8000`. This is intentionally local-only by default. Do not bind to a public interface until TLS, device identity checks, and deployment controls are configured.
+Alamat bind bawaan adalah `127.0.0.1:8000`. Secara sengaja, server hanya menerima koneksi lokal secara bawaan. Jangan mengikat server ke antarmuka publik sebelum TLS, pemeriksaan identitas perangkat, dan kontrol deployment dikonfigurasi.
 
-Optional TLS settings for local/testing use:
+Pengaturan TLS opsional untuk penggunaan lokal/pengujian:
 
 - `SSL_CERT_FILE`
 - `SSL_KEY_FILE`
 
-Both must point to existing files to enable the built-in TLS context. For production, use a properly configured HTTPS reverse proxy and implement the required Apple MDM client identity validation.
+Keduanya harus menunjuk ke berkas yang tersedia agar konteks TLS bawaan diaktifkan. Untuk produksi, gunakan proxy terbalik HTTPS yang dikonfigurasi dengan benar dan implementasikan validasi identitas klien MDM Apple yang diperlukan.
 
-### 4. Check health
+### 4. Periksa status layanan
 
 ```bash
 curl http://127.0.0.1:8000/health
 ```
 
-Expected response:
+Respons yang diharapkan:
 
 ```json
 {
@@ -132,78 +136,78 @@ Expected response:
 }
 ```
 
-The health endpoint confirms only that the Flask app responds; it does not verify Apple enrollment or APNs connectivity.
+Endpoint kesehatan hanya memastikan aplikasi Flask merespons; endpoint ini tidak memverifikasi enrollment Apple atau konektivitas APNs.
 
-## Current endpoints
+## Endpoint yang tersedia
 
-| Method | Endpoint | Purpose |
+| Metode | Endpoint | Fungsi |
 |---|---|---|
-| GET | `/health` | Basic service health check |
-| POST / PUT | `/checkin` | Accept supported Apple MDM plist check-in messages |
-| PUT | `/mdm` | Receive device MDM requests/responses and return a pending command when available |
-| POST | `/api/admin/login` | Start an administrative session using `MDM_ADMIN_TOKEN` |
-| POST | `/api/admin/logout` | Clear the administrative session |
-| GET | `/api/devices` | List device inventory; requires admin authentication |
-| POST | `/api/devices/<udid>/commands` | Queue an allowed MDM command; requires admin authentication |
+| GET | `/health` | Pemeriksaan kesehatan layanan dasar |
+| POST / PUT | `/checkin` | Menerima pesan check-in plist Apple MDM yang didukung |
+| PUT | `/mdm` | Menerima permintaan/respons MDM perangkat dan mengembalikan perintah tertunda jika tersedia |
+| POST | `/api/admin/login` | Memulai sesi administrator menggunakan `MDM_ADMIN_TOKEN` |
+| POST | `/api/admin/logout` | Mengakhiri sesi administrator |
+| GET | `/api/devices` | Menampilkan inventaris perangkat; memerlukan autentikasi administrator |
+| POST | `/api/devices/<udid>/commands` | Memasukkan perintah MDM yang diizinkan ke antrean; memerlukan autentikasi administrator |
 
-The check-in and MDM endpoints expect Apple plist request bodies, not arbitrary JSON. Device-facing endpoints are not safe to expose publicly until enrollment and device identity validation are in place.
+Endpoint check-in dan MDM mengharapkan isi permintaan plist Apple, bukan JSON sembarang. Endpoint yang diakses perangkat belum aman untuk dibuka ke publik sebelum enrollment dan validasi identitas perangkat tersedia.
 
-### Administrative API example
+### Contoh penggunaan API administrasi
 
-List devices using a bearer token:
+Menampilkan daftar perangkat menggunakan token bearer:
 
 ```bash
-curl -H "Authorization: Bearer $MDM_ADMIN_TOKEN" \
+curl -H "Authorization: Bearer $MDM_ADMIN_TOKEN" \\
   http://127.0.0.1:8000/api/devices
 ```
 
-Queue a basic device-information request for an already enrolled device:
+Memasukkan permintaan informasi dasar perangkat yang sudah terdaftar ke antrean:
 
 ```bash
-curl -X POST \
-  -H "Authorization: Bearer $MDM_ADMIN_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"command_type":"DeviceInformation","payload":{}}' \
+curl -X POST \\
+  -H "Authorization: Bearer $MDM_ADMIN_TOKEN" \\
+  -H "Content-Type: application/json" \\
+  -d '{"command_type":"DeviceInformation","payload":{}}' \\
   "http://127.0.0.1:8000/api/devices/<UDID>/commands"
 ```
 
-Replace `<UDID>` with the enrolled device's UDID. The API reports whether the APNs notification was sent; successful queuing or notification does **not** guarantee that the device executed the command. Check the command response/status and device logs.
+Ganti `<UDID>` dengan UDID perangkat yang sudah terdaftar. API melaporkan apakah notifikasi APNs telah dikirim; perintah yang berhasil masuk antrean atau notifikasi yang berhasil dikirim **tidak menjamin** perangkat telah menjalankan perintah tersebut. Periksa respons/status perintah dan log perangkat.
 
-Only use commands on devices you own or are explicitly authorized to manage. Commands such as `EraseDevice` are destructive and should be handled with additional confirmation and audit controls before production use.
+Gunakan perintah hanya pada perangkat milik Anda atau perangkat yang secara eksplisit Anda berwenang untuk kelola. Perintah seperti `EraseDevice` bersifat merusak data dan harus dilindungi dengan konfirmasi tambahan serta pencatatan audit sebelum penggunaan produksi.
 
-## Database
+## Basis data
 
-The default SQLite database is `mdm.db` in the project directory. Set `MDM_DATABASE_PATH` to use a different location. Back up the database before testing schema changes or running migrations. The current schema stores sensitive device and push metadata; protect the database file and its backups.
+Basis data SQLite bawaan adalah `mdm.db` di direktori proyek. Atur `MDM_DATABASE_PATH` untuk menggunakan lokasi lain. Cadangkan basis data sebelum menguji perubahan skema atau menjalankan migrasi. Skema saat ini menyimpan metadata perangkat dan push yang bersifat sensitif; lindungi berkas basis data beserta cadangannya.
 
-## Tests
+## Pengujian
 
-Install dependencies, then run:
+Setelah dependensi terpasang, jalankan:
 
 ```bash
-python -m compileall -q app main.py apns_push.py tests
+python -m compileall -q app main.py apns_push.py tests integrations
 python -m unittest discover -s tests -v
 ```
 
-GitHub Actions runs Python compilation and unit tests on pushes to `main` and `fix/**`, and on pull requests targeting `main`. Review the latest CI run before merging.
+GitHub Actions menjalankan kompilasi Python dan pengujian unit saat ada push ke branch `main` dan `fix/**`, serta saat ada pull request yang menargetkan `main`. Periksa hasil CI terbaru sebelum menggabungkan perubahan.
 
-## Production readiness checklist
+## Daftar pemeriksaan kesiapan produksi
 
-- [ ] Complete signed enrollment-profile workflow and verify profile installation/enrollment.
-- [ ] Enforce HTTPS and validate device identity/client certificates according to Apple's MDM requirements.
-- [ ] Protect enrollment/check-in endpoints against spoofing and unauthorized requests.
-- [ ] Validate every supported command and response against Apple's protocol schema.
-- [ ] Verify APNs topic, PushMagic, device token, and credentials with a real enrolled test device.
-- [ ] Add audit logs, rate limits, monitoring, backups, and retention controls.
-- [ ] Add end-to-end tests for enrollment, TokenUpdate, command delivery, command results, and CheckOut.
-- [ ] Review destructive-command permissions and require explicit confirmation.
-- [ ] Rotate all secrets and restrict access to the database and APNs key.
+- [ ] Selesaikan alur profil enrollment yang ditandatangani dan verifikasi pemasangan profil/enrollment.
+- [ ] Wajibkan HTTPS dan validasi identitas perangkat/sertifikat klien sesuai persyaratan MDM Apple.
+- [ ] Lindungi endpoint enrollment/check-in dari pemalsuan identitas dan permintaan tanpa izin.
+- [ ] Validasi setiap perintah dan respons yang didukung berdasarkan skema protokol Apple.
+- [ ] Verifikasi topik APNs, PushMagic, token perangkat, dan kredensial menggunakan perangkat uji nyata yang sudah terdaftar.
+- [ ] Tambahkan log audit, pembatasan laju permintaan, pemantauan, pencadangan, dan kontrol retensi data.
+- [ ] Tambahkan pengujian menyeluruh untuk enrollment, TokenUpdate, pengiriman perintah, hasil perintah, dan CheckOut.
+- [ ] Tinjau izin untuk perintah yang merusak data dan wajibkan konfirmasi eksplisit.
+- [ ] Rotasi semua secret dan batasi akses ke basis data serta kunci APNs.
 
-## References
+## Referensi
 
-- [Apple Device Management documentation](https://developer.apple.com/documentation/devicemanagement)
+- [Dokumentasi Apple Device Management](https://developer.apple.com/documentation/devicemanagement)
 - [Apple MDM Check-in](https://developer.apple.com/documentation/devicemanagement/check-in)
-- [Sending MDM Commands to a Device](https://developer.apple.com/documentation/devicemanagement/sending-mdm-commands-to-a-device)
+- [Mengirim perintah MDM ke perangkat](https://developer.apple.com/documentation/devicemanagement/sending-mdm-commands-to-a-device)
 
-## License
+## Lisensi
 
-Check the repository's license file before redistributing or using this project in a commercial product.
+Periksa berkas lisensi di repositori sebelum mendistribusikan ulang atau menggunakan proyek ini dalam produk komersial.
