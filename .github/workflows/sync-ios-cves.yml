@@ -1,0 +1,36 @@
+name: Sinkronisasi CVE iOS/iPadOS
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "23 4 * * 1"
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Ambil repositori
+        uses: actions/checkout@v4
+      - name: Siapkan Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Sinkronkan katalog CVE Apple
+        run: python -m scripts.sync_ios_cves
+      - name: Periksa format JSON
+        run: python -m json.tool data/ios-ipados-cves.json > /dev/null
+      - name: Simpan perubahan katalog
+        run: |
+          if git diff --quiet -- data/ios-ipados-cves.json; then
+            echo "Katalog tidak berubah."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/ios-ipados-cves.json
+          git commit -m "Perbarui katalog CVE iOS/iPadOS"
+          git push

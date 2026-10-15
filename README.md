@@ -211,3 +211,26 @@ GitHub Actions menjalankan kompilasi Python dan pengujian unit saat ada push ke 
 ## Lisensi
 
 Periksa berkas lisensi di repositori sebelum mendistribusikan ulang atau menggunakan proyek ini dalam produk komersial.
+
+
+## Katalog CVE iOS/iPadOS
+
+Repositori menyediakan skrip untuk membangun katalog CVE dari indeks dan halaman advisori keamanan resmi Apple. Katalog JSON yang dihasilkan berada di `data/ios-ipados-cves.json`.
+
+**Jalankan sinkronisasi secara manual:**
+
+```bash
+python -m scripts.sync_ios_cves
+```
+
+Untuk pengujian terbatas, misalnya hanya memproses dua advisori pertama:
+
+```bash
+python -m scripts.sync_ios_cves --max-advisories 2 --output /tmp/ios-cves-test.json
+```
+
+Alur GitHub Actions `Sinkronisasi CVE iOS/iPadOS` juga dapat dijalankan secara manual dari tab **Actions** dan dijadwalkan mingguan. Alur ini memperbarui berkas JSON di branch `main` jika ada perubahan. Jika sumber Apple tidak dapat diakses atau tidak ada advisori yang terdeteksi, skrip gagal tanpa menimpa katalog lama dengan hasil kosong.
+
+Setiap entri berisi ID CVE, produk, judul advisori, tanggal rilis jika ditemukan, konteks teks, URL advisori Apple, dan sumber. CVE yang muncul di beberapa advisori digabung menjadi satu entri dengan daftar URL sumber.
+
+**Batas cakupan:** katalog ini menghimpun CVE yang ditemukan pada advisori resmi Apple untuk iOS/iPadOS. Ini bukan jaminan bahwa semua CVE yang menyebut iOS di seluruh basis data pihak ketiga, riset yang belum dipublikasikan, atau kerentanan tanpa ID CVE tercakup. Data versi terdampak dan skor CVSS tidak disimpulkan jika sumber tidak menyediakannya. Selalu buka advisori sumber sebelum mengambil keputusan keamanan.
