@@ -1,3 +1,5 @@
-Flask
-Flask-Admin
-apns2
+Flask>=3.0,<4.0
+Flask-Admin>=1.6.1,<2.0
+Flask-SQLAlchemy>=3.1,<4.0
+httpx[http2]>=0.27,<1.0
+PyJWT[crypto]>=2.8,<3.0
