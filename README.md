@@ -313,7 +313,7 @@ py -3.11 -m venv .venv-iphone
 .\\.venv-iphone\\Scripts\\Activate.ps1
 python -m pip install -r device-helper\\requirements.txt
 $env:IPHONE_HELPER_TOKEN = python -c "import secrets; print(secrets.token_urlsafe(32))"
-$env:IPHONE_HELPER_ALLOWED_ORIGINS = "https://mdm-server-ten.vercel.app,http://localhost:3000,http://127.0.0.1:3000"
+$env:IPHONE_HELPER_ALLOWED_ORIGINS = "https://mdm-server-ten.vercel.app,https://mdm-server-git-feat-iphone-unified-toolkit-strongbees-projects.vercel.app,http://localhost:3000,http://127.0.0.1:3000"
 python device-helper\\app.py
 ```
 
