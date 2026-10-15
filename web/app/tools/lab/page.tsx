@@ -92,7 +92,7 @@ export default function IPhoneLabPage() {
       setDevices(result.devices || []);
       setDeviceState("ready");
       setMessage(result.count ? `Ditemukan ${result.count} perangkat melalui ${result.source || "helper lokal"}.` : "Helper merespons, tetapi belum menemukan perangkat USB.");
-      saveSettings();
+      try { sessionStorage.setItem("iphone-helper-url", url); sessionStorage.setItem("iphone-helper-token", token); } catch { /* Keep current in-memory configuration. */ }
     } catch (cause) {
       setDeviceState("error");
       setError(cause instanceof Error ? cause.message : "Tidak dapat terhubung ke helper lokal.");
@@ -131,7 +131,7 @@ export default function IPhoneLabPage() {
       setFirmware(firmwareResult);
       setFirmwareState("ready");
       setMessage("Metadata IPSW berhasil dibaca oleh helper lokal. Komponen firmware tidak diekstrak atau dimodifikasi.");
-      saveSettings();
+      try { sessionStorage.setItem("iphone-helper-url", url); sessionStorage.setItem("iphone-helper-token", token); } catch { /* Keep current in-memory configuration. */ }
     } catch (cause) {
       setFirmwareState("error");
       setError(cause instanceof Error ? cause.message : "Inspeksi IPSW gagal.");
