@@ -129,6 +129,53 @@ def devices():
     return jsonify(devices=safe_devices, count=len(safe_devices), source="pymobiledevice3 usbmux list --usb")
 
 
+
+@app.route("/api/devices/<udid>/info", methods=["GET", "OPTIONS"])
+def device_info(udid: str):
+    if request.method == "OPTIONS":
+        return ("", 204)
+    denied = require_auth()
+    if denied:
+        return denied
+    # UDID is passed through an environment variable, never interpolated into a shell command.
+    import re
+    if not re.fullmatch(r"[A-Za-z0-9-]{8,128}", udid):
+        return jsonify(error="Format UDID tidak valid."), 400
+
+    executable = shutil.which("pymobiledevice3")
+    command = [executable, "lockdown", "info"] if executable else [
+        sys.executable, "-m", "pymobiledevice3", "lockdown", "info"
+    ]
+    env = os.environ.copy()
+    env["PYMOBILEDEVICE3_UDID"] = udid
+    try:
+        completed = subprocess.run(
+            command, capture_output=True, text=True, timeout=30, check=False, shell=False, env=env
+        )
+    except subprocess.TimeoutExpired:
+        return jsonify(error="Pembacaan metadata perangkat timeout setelah 30 detik."), 504
+    except OSError as exc:
+        return jsonify(error=f"Tidak dapat menjalankan pymobiledevice3: {exc}"), 503
+
+    if completed.returncode != 0:
+        detail = (completed.stderr or completed.stdout or "Tidak ada detail").strip()[-1200:]
+        return jsonify(error="Tidak dapat membaca metadata lockdown. Pastikan perangkat terhubung dan komputer sudah dipercaya.", detail=detail), 503
+    try:
+        parsed = json.loads(completed.stdout or "{}")
+    except json.JSONDecodeError:
+        return jsonify(error="Output metadata perangkat bukan JSON yang dikenali."), 502
+    if not isinstance(parsed, dict):
+        return jsonify(error="Format metadata perangkat tidak dikenali."), 502
+
+    # Return a diagnostic allowlist only; omit pair records, network addresses, and unrelated identifiers.
+    allowed_keys = (
+        "DeviceName", "ProductType", "ProductVersion", "BuildVersion", "DeviceClass",
+        "HardwareModel", "ModelNumber", "ActivationState", "PasswordProtected",
+        "IsSupervised", "IsDeviceLocatorServiceEnabled", "DeviceColor", "DeviceEnclosureColor",
+    )
+    info = {key: parsed[key] for key in allowed_keys if isinstance(parsed.get(key), (str, int, float, bool))}
+    return jsonify(udid=udid, info=info, source="pymobiledevice3 lockdown info")
+
 @app.route("/api/firmware/inspect", methods=["POST", "OPTIONS"])
 def inspect_firmware():
     if request.method == "OPTIONS":
