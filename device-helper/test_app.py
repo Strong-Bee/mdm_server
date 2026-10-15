@@ -41,6 +41,31 @@ class HelperApiTests(unittest.TestCase):
         self.assertEqual(run.call_args.kwargs["shell"], False)
         self.assertEqual(run.call_args.kwargs["timeout"], 25)
 
+
+    @patch("app.subprocess.run")
+    @patch("app.shutil.which", return_value="/usr/bin/pymobiledevice3")
+    def test_device_info_returns_allowlisted_fields(self, _which, run):
+        run.return_value.returncode = 0
+        run.return_value.stdout = json.dumps({
+            "DeviceName": "Test iPhone",
+            "ProductType": "iPhone15,2",
+            "ProductVersion": "17.0",
+            "WiFiAddress": "00:11:22:33:44:55",
+            "PairRecord": {"secret": "hidden"},
+        })
+        run.return_value.stderr = ""
+        response = self.client.get("/api/devices/12345678-ABCD/info", headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get_json()["info"]["ProductType"], "iPhone15,2")
+        self.assertNotIn("WiFiAddress", response.get_json()["info"])
+        self.assertNotIn("PairRecord", response.get_json()["info"])
+        self.assertEqual(run.call_args.kwargs["env"]["PYMOBILEDEVICE3_UDID"], "12345678-ABCD")
+        self.assertFalse(run.call_args.kwargs["shell"])
+
+    def test_device_info_rejects_invalid_udid(self):
+        response = self.client.get("/api/devices/../../bad/info", headers=self.headers)
+        self.assertIn(response.status_code, (400, 404))
+
     def test_firmware_rejects_wrong_extension(self):
         response = self.client.post(
             "/api/firmware/inspect",
