@@ -39,6 +39,39 @@ Komunikasi MDM Apple umumnya memiliki dua jalur berbeda:
 
 APNs hanya berfungsi sebagai sinyal untuk membangunkan perangkat, bukan sebagai saluran yang membawa isi perintah. Perangkat terhubung ke server MDM untuk mengambil perintah.
 
+### Flow chart alur kerja MDM
+
+Diagram berikut menunjukkan alur tingkat tinggi untuk perangkat yang sudah melalui enrollment dan terdaftar. Implementasi repo ini masih eksperimental; alur enrollment lengkap dan validasi identitas perangkat belum selesai.
+
+```mermaid
+flowchart TD
+    A([Mulai]) --> B[Admin menyiapkan server dan kredensial]
+    B --> C{Enrollment perangkat sudah sah dan tervalidasi?}
+    C -- Belum --> D[Hentikan: lengkapi enrollment, TLS, dan validasi identitas]
+    D --> C
+    C -- Ya --> E[iPhone / iPad mengirim check-in plist]
+    E --> F[Server menerima /checkin]
+    F --> G[Simpan atau perbarui metadata perangkat di SQLite]
+    G --> H[Admin mengautentikasi ke API]
+    H --> I[Admin memasukkan perintah yang diizinkan ke antrean]
+    I --> J[Server menyimpan perintah tertunda]
+    J --> K[Server mengirim sinyal wake-up melalui APNs]
+    K --> L[Perangkat menerima notifikasi APNs]
+    L --> M[Perangkat terhubung ke endpoint /mdm]
+    M --> N[Server mengirim perintah antrean sebagai plist]
+    N --> O[Perangkat menjalankan perintah]
+    O --> P[Perangkat mengirim respons/status perintah]
+    P --> Q[Server memperbarui status dan metadata]
+    Q --> R{Masih ada perintah tertunda?}
+    R -- Ya --> M
+    R -- Tidak --> S([Selesai / menunggu perintah berikutnya])
+```
+
+**Catatan alur:**
+- APNs hanya mengirim sinyal untuk membangunkan perangkat; isi perintah diambil perangkat dari server melalui koneksi MDM.
+- Perintah yang masuk antrean atau notifikasi APNs yang terkirim belum membuktikan perintah berhasil dijalankan. Periksa respons/status perangkat.
+- Endpoint `/checkin` dan `/mdm` tidak boleh dibuka ke internet publik sebelum validasi identitas perangkat dan kontrol keamanan enrollment diterapkan.
+
 ## Persyaratan
 
 - Python 3.11 atau lebih baru (CI saat ini menggunakan Python 3.11).
