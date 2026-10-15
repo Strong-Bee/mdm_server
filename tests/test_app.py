@@ -26,9 +26,10 @@ class MDMApiTests(unittest.TestCase):
     def setUpClass(cls):
         cls.app = create_app()
         cls.app.config.update(TESTING=True)
-        cls.client = cls.app.test_client()
 
     def setUp(self):
+        # Isolate session cookies as well as database rows between tests.
+        self.client = self.app.test_client()
         # Initialize the route-managed SQLite schema before clearing test data.
         self.client.get("/health")
         # Keep tests independent even though they share one test database.
