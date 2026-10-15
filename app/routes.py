@@ -2,9 +2,10 @@ import hmac
 import os
 import sqlite3
 import uuid
+import json
 from functools import wraps
 
-from flask import Blueprint, current_app, g, jsonify, request
+from flask import Blueprint, current_app, g, jsonify, request, session
 
 mdm_bp = Blueprint("mdm", __name__)
 
@@ -45,11 +46,14 @@ def _admin_required(fn):
     @wraps(fn)
     def wrapped(*args, **kwargs):
         expected = current_app.config.get("MDM_ADMIN_TOKEN") or os.environ.get("MDM_ADMIN_TOKEN")
-        supplied = request.headers.get("Authorization", "")
         if not expected:
             return jsonify(error="Admin actions are disabled: MDM_ADMIN_TOKEN is not configured"), 503
+
+        supplied = request.headers.get("Authorization", "")
         token = supplied[7:] if supplied.startswith("Bearer ") else ""
-        if not token or not hmac.compare_digest(token, expected):
+        token_ok = bool(token) and hmac.compare_digest(token, expected)
+        session_ok = session.get("mdm_admin_authenticated") is True
+        if not token_ok and not session_ok:
             return jsonify(error="Unauthorized"), 401
         return fn(*args, **kwargs)
     return wrapped
@@ -143,10 +147,9 @@ def queue_command(udid):
         return jsonify(error="payload must be a JSON object"), 400
 
     command_uuid = str(uuid.uuid4())
-    import json
     g.mdm_db.execute(
         "INSERT INTO commands (udid, command_uuid, command_type, payload, status) VALUES (?, ?, ?, ?, 'pending')",
-        (udid, command_uuid, command_type, json.dumps(payload)),
+        (udid, command_uuid, command_type, json.dumps(payload)), 
     )
     g.mdm_db.commit()
     return jsonify(status="queued", command_uuid=command_uuid), 202
