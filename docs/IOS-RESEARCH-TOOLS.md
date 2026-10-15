@@ -46,6 +46,27 @@ Katalog ini bersifat referensi dan inventaris. Repository MDM tidak mengimplemen
 5. Simpan secret dan data perangkat di luar Git; jangan mencatat token sensitif.
 6. Catat hasil pengujian sebelum memberi status “supported”.
 
+
+## Konsep aplikasi terpadu: iPhone Toolkit
+
+Halaman `/tools` kini dirancang sebagai satu workspace dengan pencarian dan filter katalog, ringkasan status, serta empat modul:
+
+1. **Device overview** — rancangan inventaris model/iOS dan status koneksi.
+2. **Diagnostics** — rancangan hasil diagnostik dari perangkat yang dipairing dan diotorisasi.
+3. **IPSW inspector** — rancangan pemeriksaan metadata firmware secara lokal/offline.
+4. **Protocol library** — katalog upstream, status review, dan catatan kompatibilitas.
+
+**Status implementasi:** UI workspace dan filter katalog tersedia; koneksi perangkat, diagnostik live, parsing IPSW, dan eksekusi binary native belum diimplementasikan. Angka dan label pada ringkasan UI adalah status katalog/rancangan, bukan hasil pemindaian perangkat.
+
+### Arsitektur tahap berikutnya
+
+- **Web UI (Next.js):** hanya mengirim permintaan terstruktur ke endpoint helper yang sudah diautentikasi; jangan menerima shell command bebas.
+- **Local device helper:** proses terpisah di komputer operator, dipasang dan dijalankan secara eksplisit. Mulai dengan operasi read-only seperti daftar perangkat yang terpairing dan metadata dasar.
+- **Firmware inspector:** proses lokal terisolasi, batas ukuran file, validasi tipe, timeout, dan tanpa unggah firmware ke server publik secara default.
+- **Safety controls:** pairing/kepercayaan harus disetujui pengguna, autentikasi lokal, allowlist operasi, audit log yang meredaksi data sensitif, dan pemisahan dari endpoint MDM.
+- **Tidak didukung:** bypass Activation Lock/iCloud, penghapusan status aktivasi, patch `mobileactivationd` untuk menghindari aktivasi, atau otomatisasi rantai eksploit.
+
+
 ## Status saat ini
 
 Semua entri di atas adalah **referensi katalog**, bukan klaim instalasi atau integrasi executable. Backend MDM dan frontend yang ada tetap dipertahankan.
