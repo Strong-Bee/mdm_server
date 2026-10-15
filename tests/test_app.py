@@ -29,6 +29,8 @@ class MDMApiTests(unittest.TestCase):
         cls.client = cls.app.test_client()
 
     def setUp(self):
+        # Initialize the route-managed SQLite schema before clearing test data.
+        self.client.get("/health")
         # Keep tests independent even though they share one test database.
         with self.app.app_context():
             from app.routes import _connect
