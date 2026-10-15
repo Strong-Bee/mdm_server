@@ -82,7 +82,7 @@ def extract_advisory_links(html: str, base_url: str = INDEX_URL) -> list[tuple[s
         parsed = urlparse(url)
         if parsed.scheme != "https" or parsed.hostname not in {"support.apple.com", "www.apple.com"}:
             continue
-        if IOS_TITLE_RE.search(title) and re.search(r"security|content|update|iOS|iPadOS", title, re.I):
+        if IOS_TITLE_RE.search(title) and re.search(r"security|content", title, re.I):
             found[url] = title or url
     return sorted(found.items())
 
