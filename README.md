@@ -271,3 +271,32 @@ Alur GitHub Actions `Sinkronisasi CVE iOS/iPadOS` juga dapat dijalankan secara m
 Setiap entri berisi ID CVE, produk, judul advisori, tanggal rilis jika ditemukan, konteks teks, URL advisori Apple, dan sumber. CVE yang muncul di beberapa advisori digabung menjadi satu entri dengan daftar URL sumber.
 
 **Batas cakupan:** katalog ini menghimpun CVE yang ditemukan pada advisori resmi Apple untuk iOS/iPadOS. Ini bukan jaminan bahwa semua CVE yang menyebut iOS di seluruh basis data pihak ketiga, riset yang belum dipublikasikan, atau kerentanan tanpa ID CVE tercakup. Data versi terdampak dan skor CVSS tidak disimpulkan jika sumber tidak menyediakannya. Selalu buka advisori sumber sebelum mengambil keputusan keamanan.
+
+
+## Antarmuka Next.js + TypeScript
+
+Direktori `web/` berisi antarmuka web Next.js App Router dengan TypeScript:
+
+- Landing page responsif untuk dokumentasi dan pengenalan proyek.
+- Dashboard inventaris perangkat di `/dashboard`.
+- Kontrak tipe API di `web/lib/mdm-types.ts`.
+- Next.js Route Handlers yang mem-proxy permintaan dashboard ke backend Flask, agar browser tidak perlu menangani CORS langsung.
+- Antrean perintah menggunakan daftar RequestType yang didukung backend.
+
+### Menjalankan antarmuka secara lokal
+
+```bash
+cd web
+npm install
+cp .env.example .env.local
+# Ubah MDM_API_BASE_URL menjadi URL backend Flask yang dapat dijangkau.
+npm run dev
+```
+
+Buka `http://localhost:3000`. Untuk menghubungkan dashboard, masukkan token admin yang dikonfigurasi pada backend melalui `MDM_ADMIN_TOKEN`. Token dashboard disimpan pada sesi tab browser, bukan ditulis ke file atau database Next.js.
+
+### Deploy landing page/dashboard di Vercel
+
+Import repository `Strong-Bee/mdm_server`, pilih **Next.js**, dan atur **Root Directory** ke `web`. Tambahkan environment variable `MDM_API_BASE_URL` yang menunjuk ke backend Flask melalui HTTPS.
+
+**Penting:** UI Next.js ini tidak menggantikan protokol MDM/APNs backend. Implementasi protokol inti masih berada di Python karena backend saat ini bergantung pada Flask, plistlib, SQLite, dan integrasi APNs. Frontend TypeScript berkomunikasi dengan API backend melalui route handler yang bertipe. Jangan menganggap deployment Vercel otomatis men-deploy backend, menyediakan penyimpanan persisten, atau menjadikan endpoint MDM aman untuk internet publik. Selesaikan validasi identitas perangkat, enrollment, keamanan token, dan pengujian terlebih dahulu.
