@@ -9,5 +9,5 @@ class Config:
     DATABASE = os.environ.get("MDM_DATABASE_PATH", _DATABASE_PATH)
     SQLALCHEMY_DATABASE_URI = "sqlite:///" + DATABASE.replace("\\", "/")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SECRET_KEY = os.environ.get("FLASK_SECRET_KEY")
+    SECRET_KEY = os.environ.get("FLASK_SECRET_KEY") or os.urandom(32)
     MDM_ADMIN_TOKEN = os.environ.get("MDM_ADMIN_TOKEN")
