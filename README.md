@@ -1,4 +1,8 @@
-# Server MDM Apple iOS/iPadOS
+# Apple iOS/iPadOS MDM Server
+
+> Server MDM eksperimental untuk pembelajaran protokol Apple, administrasi perangkat yang sah, dan katalog CVE iOS/iPadOS berbasis advisori keamanan resmi.
+
+**Status:** eksperimental — belum siap untuk produksi. Lihat [Tentang Proyek](ABOUT.md) untuk tujuan, ruang lingkup, batasan keamanan, dan sumber resmi.
 
 Implementasi dasar protokol **Mobile Device Management (MDM)** Apple menggunakan Python dan Flask untuk eksperimen serta administrasi iPhone dan iPad yang **sah dan telah mendapat izin**.
 
