@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 type Device = Record<string, string | number | boolean>;
-type DeviceResponse = { devices?: Device[]; count?: number; error?: string; detail?: string; source?: string };
+type DeviceResponse = { devices?: Device[]; count?: number; error?: string; detail?: string; source?: string; udid?: string; info?: Record<string, string | number | boolean> };
 type FirmwareResult = {
   filename: string;
   size_bytes: number;
@@ -47,6 +47,8 @@ export default function IPhoneLabPage() {
   const [baseUrl, setBaseUrl] = useState("http://127.0.0.1:8787");
   const [token, setToken] = useState("");
   const [devices, setDevices] = useState<Device[]>([]);
+  const [deviceInfo, setDeviceInfo] = useState<Record<string, Record<string, string | number | boolean>>>({});
+  const [detailBusy, setDetailBusy] = useState("");
   const [deviceState, setDeviceState] = useState<"idle" | "loading" | "ready" | "error">("idle");
   const [firmware, setFirmware] = useState<FirmwareResult | null>(null);
   const [firmwareState, setFirmwareState] = useState<"idle" | "loading" | "ready" | "error">("idle");
@@ -74,6 +76,26 @@ export default function IPhoneLabPage() {
       setError("");
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Konfigurasi tidak valid.");
+    }
+  }
+
+
+  async function loadDeviceInfo(udid: string) {
+    setDetailBusy(udid);
+    setError("");
+    try {
+      const url = localHelperUrl(baseUrl);
+      const response = await fetch(`${url}/api/devices/${encodeURIComponent(udid)}/info`, {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      });
+      const result = (await response.json()) as DeviceResponse;
+      if (!response.ok) throw new Error(result.error || `Helper mengembalikan HTTP ${response.status}`);
+      setDeviceInfo((current) => ({ ...current, [udid]: result.info || {} }));
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Gagal membaca metadata lockdown.");
+    } finally {
+      setDetailBusy("");
     }
   }
 
@@ -173,7 +195,7 @@ export default function IPhoneLabPage() {
         {deviceState === "loading" && <p>Menjalankan discovery USB dengan timeout 25 detik…</p>}
         {deviceState === "error" && <p>Discovery gagal. Periksa apakah helper berjalan, token benar, CORS diizinkan, dan driver Apple/usbmuxd tersedia.</p>}
         {deviceState === "ready" && devices.length === 0 && <p>Helper merespons tetapi tidak melihat iPhone. Periksa kabel data, Trust This Computer, Apple Devices/iTunes, dan jalankan <code>pymobiledevice3 usbmux list --usb</code> di komputer.</p>}
-        {deviceState === "ready" && devices.length > 0 && <div style={{ display: "grid", gap: "0.7rem" }}>{devices.map((device, index) => <article key={String(device.udid || device.UniqueDeviceID || index)} style={{ border: "1px solid var(--line, #263247)", borderRadius: "0.7rem", padding: "0.8rem" }}><strong>{String(device.DeviceName || device.device_name || device.ProductType || device.product_type || "Apple device")}</strong><pre style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere", fontSize: "0.85rem" }}>{JSON.stringify(device, null, 2)}</pre></article>)}</div>}
+        {deviceState === "ready" && devices.length > 0 && <div style={{ display: "grid", gap: "0.7rem" }}>{devices.map((device, index) => { const udid = String(device.udid || device.UniqueDeviceID || ""); return <article key={udid || index} style={{ border: "1px solid var(--line, #263247)", borderRadius: "0.7rem", padding: "0.8rem" }}><strong>{String(device.DeviceName || device.device_name || device.ProductType || device.product_type || "Apple device")}</strong><pre style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere", fontSize: "0.85rem" }}>{JSON.stringify(device, null, 2)}</pre>{udid && <button className="button button-secondary" type="button" disabled={detailBusy === udid} onClick={() => void loadDeviceInfo(udid)}>{detailBusy === udid ? "Membaca metadata…" : "Baca metadata iOS"}</button>}{deviceInfo[udid] && <pre style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere", fontSize: "0.85rem", borderTop: "1px solid var(--line, #263247)", paddingTop: "0.7rem" }}>{JSON.stringify(deviceInfo[udid], null, 2)}</pre>}</article>; })}</div>}
       </section>
 
       <section style={panel}>
