@@ -42,7 +42,7 @@ const categories = [
 
 const modules = [
   { number: "01", title: "Device overview", description: "Discovery perangkat USB melalui pymobiledevice3 dari komputer lokal.", status: "Tersedia di /tools/lab; perlu helper lokal" },
-  { number: "02", title: "Diagnostics", description: "Ruang kerja untuk hasil diagnostik yang aman dan tindakan yang diotorisasi.", status: "Rancangan UI" },
+  { number: "02", title: "Diagnostics", description: "Baca metadata lockdown iOS melalui koneksi USB yang telah dipercaya.", status: "Tersedia di /tools/lab; perlu helper lokal" },
   { number: "03", title: "IPSW inspector", description: "Baca BuildManifest, versi produk/build, model yang didukung, daftar komponen dan SHA-256.", status: "Metadata-only di /tools/lab; perlu helper lokal" },
   { number: "04", title: "Protocol library", description: "Indeks library upstream, dukungan platform, lisensi, dan status review.", status: "Katalog tersedia" },
 ];
