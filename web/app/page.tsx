@@ -95,6 +95,7 @@ export default function Home() {
           <a href="#fitur">Fitur</a>
           <a href="#alur">Cara kerja</a>
           <a href="/dashboard">Dashboard</a>
+          <a href="/tools">Tools iOS</a>
           <a href="#keamanan">Keamanan</a>
         </nav>
         <a className="header-cta" href={repositoryUrl} target="_blank" rel="noreferrer">
