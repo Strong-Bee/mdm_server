@@ -1,6 +1,8 @@
 name: Sinkronisasi CVE iOS/iPadOS
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
   schedule:
     - cron: "23 4 * * 1"
