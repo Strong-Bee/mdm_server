@@ -1,6 +1,7 @@
 import io
 import json
 import os
+import sys
 import plistlib
 import tempfile
 import unittest
@@ -8,6 +9,7 @@ import zipfile
 from unittest.mock import patch
 
 os.environ["IPHONE_HELPER_TOKEN"] = "test-helper-token"
+sys.path.insert(0, os.path.dirname(__file__))
 from app import app  # noqa: E402
 
 
