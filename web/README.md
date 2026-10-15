@@ -1,33 +1,48 @@
-# MDM Server Landing Page
+# MDM Server Web — Next.js + TypeScript
 
-Next.js landing page for the experimental Apple iOS/iPadOS MDM server project.
+Antarmuka web untuk proyek Apple iOS/iPadOS MDM eksperimental.
+
+## Fitur
+
+- Landing page responsif berbahasa Indonesia.
+- Dashboard inventaris perangkat di `/dashboard`.
+- Kontrak tipe API bersama di `lib/mdm-types.ts`.
+- Route Handlers Next.js untuk meneruskan permintaan ke API admin Flask.
+- Antrean perintah dari daftar RequestType yang didukung backend.
+- Token admin digunakan dalam sesi browser; backend token tidak disimpan ke kode sumber.
 
 ## Stack
 
 - Next.js App Router
-- React
-- TypeScript (strict mode)
-- Responsive CSS; no component library required
+- React + TypeScript strict
+- CSS responsif
+- Next.js Route Handlers (Node.js runtime)
 
-## Local development
+## Pengembangan lokal
 
-From this directory:
+Dari direktori ini:
 
 ```bash
 npm install
+cp .env.example .env.local
+# Edit MDM_API_BASE_URL agar mengarah ke backend Flask.
 npm run dev
 ```
 
-Open http://localhost:3000.
+Buka http://localhost:3000. Halaman utama berisi pengenalan proyek dan dashboard ada di http://localhost:3000/dashboard.
 
-## Vercel deployment
+## Environment
 
-Import `Strong-Bee/mdm_server` from GitHub, then set **Root Directory** to `web`. Vercel will detect Next.js and use the scripts and dependencies in `web/package.json`.
+`MDM_API_BASE_URL` adalah URL dasar backend Flask. Gunakan HTTPS untuk deployment selain localhost. Jangan menambahkan token admin ke variabel publik seperti `NEXT_PUBLIC_*`.
 
-This is a static marketing/documentation site. It does **not** deploy or expose the Python Flask MDM backend. The backend still requires a deployment environment with persistent storage, HTTPS, device identity validation, and proper enrollment security. Do not publish the experimental MDM endpoints publicly until those controls are implemented and tested.
+## Deployment Vercel
 
-## Links
+Import `Strong-Bee/mdm_server`, pilih preset **Next.js**, dan atur **Root Directory** menjadi `web`. Tambahkan `MDM_API_BASE_URL` di Project Settings → Environment Variables.
 
-- [Main repository](https://github.com/Strong-Bee/mdm_server)
-- [Project README](https://github.com/Strong-Bee/mdm_server/blob/main/README.md)
-- [Project security notes](https://github.com/Strong-Bee/mdm_server/blob/main/ABOUT.md)
+Deployment ini menerbitkan frontend Next.js dan proxy API dashboard saja. Backend MDM Flask/Python, SQLite, serta integrasi APNs tetap layanan terpisah. SQLite lokal pada serverless tidak cocok untuk penyimpanan produksi persisten. Jangan publikasikan endpoint MDM sebelum validasi identitas perangkat, enrollment, TLS, kontrol akses, dan pengujian keamanan selesai.
+
+## Referensi
+
+- [Backend repository](https://github.com/Strong-Bee/mdm_server)
+- [README utama](https://github.com/Strong-Bee/mdm_server/blob/main/README.md)
+- [Catatan keamanan proyek](https://github.com/Strong-Bee/mdm_server/blob/main/ABOUT.md)
