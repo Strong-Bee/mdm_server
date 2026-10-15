@@ -19,23 +19,20 @@ class MdmClientTests(unittest.TestCase):
         self.assertEqual(mdm_client.validate_base_url("https://mdm.example.com/"), "https://mdm.example.com")
         self.assertEqual(mdm_client.validate_base_url("http://127.0.0.1:8000/"), "http://127.0.0.1:8000")
 
-    @patch("mdm_client.urlopen")
-    def test_request_uses_bearer_token_and_json(self, mocked_urlopen):
+    def test_request_uses_bearer_token_and_json(self):
         class Response:
             def __enter__(self):
                 return self
-
             def __exit__(self, *args):
                 return False
-
             def read(self):
                 return b'{"status":"queued"}'
 
-        mocked_urlopen.return_value = Response()
-        result = mdm_client.request_json(
-            "https://mdm.example.com", "secret", "/api/devices/UDID/commands",
-            method="POST", payload={"command_type": "DeviceInformation", "payload": {}},
-        )
+        with patch.object(mdm_client, "urlopen", return_value=Response()) as mocked_urlopen:
+            result = mdm_client.request_json(
+                "https://mdm.example.com", "secret", "/api/devices/UDID/commands",
+                method="POST", payload={"command_type": "DeviceInformation", "payload": {}},
+            )
         self.assertEqual(result, {"status": "queued"})
         request = mocked_urlopen.call_args.args[0]
         self.assertEqual(request.get_header("Authorization"), "Bearer secret")
