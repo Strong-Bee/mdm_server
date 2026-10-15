@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any
 
 from flask import Flask, jsonify, request
-from werkzeug.exceptions import RequestEntityTooLarge
+from werkzeug.exceptions import HTTPException, RequestEntityTooLarge
 
 MAX_IPSW_BYTES = int(os.environ.get("IPHONE_HELPER_MAX_IPSW_BYTES", str(16 * 1024**3)))
 MAX_MANIFEST_BYTES = 32 * 1024 * 1024
@@ -22,7 +22,7 @@ ALLOWED_ORIGINS = {
     origin.strip().rstrip("/")
     for origin in os.environ.get(
         "IPHONE_HELPER_ALLOWED_ORIGINS",
-        "http://localhost:3000,http://127.0.0.1:3000,https://mdm-server-ten.vercel.app",
+        "http://localhost:3000,http://127.0.0.1:3000,https://mdm-server-ten.vercel.app,https://mdm-server-git-feat-iphone-unified-toolkit-strongbees-projects.vercel.app",
     ).split(",")
     if origin.strip()
 }
@@ -210,6 +210,8 @@ def inspect_firmware():
 
 @app.errorhandler(Exception)
 def unexpected_error(error):
+    if isinstance(error, HTTPException):
+        return jsonify(error=error.description), error.code
     # Avoid leaking stack traces, filesystem paths, or environment secrets to the client.
     app.logger.exception("Unhandled local-helper error")
     return jsonify(error="Kesalahan internal helper. Periksa log lokal."), 500
