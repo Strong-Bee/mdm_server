@@ -1,8 +1,8 @@
 import hmac
+import json
 import os
 import sqlite3
 import uuid
-import json
 from functools import wraps
 
 from flask import Blueprint, current_app, g, jsonify, request, session
@@ -39,6 +39,13 @@ def _ensure_schema(conn):
             created_at TEXT DEFAULT CURRENT_TIMESTAMP
         );
     """)
+    # CREATE TABLE IF NOT EXISTS does not add columns to an existing database.
+    device_columns = {row["name"] for row in conn.execute("PRAGMA table_info(devices)")}
+    if "last_status" not in device_columns:
+        conn.execute("ALTER TABLE devices ADD COLUMN last_status TEXT")
+    command_columns = {row["name"] for row in conn.execute("PRAGMA table_info(commands)")}
+    if "created_at" not in command_columns:
+        conn.execute("ALTER TABLE commands ADD COLUMN created_at TEXT")
     conn.commit()
 
 
@@ -149,7 +156,7 @@ def queue_command(udid):
     command_uuid = str(uuid.uuid4())
     g.mdm_db.execute(
         "INSERT INTO commands (udid, command_uuid, command_type, payload, status) VALUES (?, ?, ?, ?, 'pending')",
-        (udid, command_uuid, command_type, json.dumps(payload)), 
+        (udid, command_uuid, command_type, json.dumps(payload)),
     )
     g.mdm_db.commit()
     return jsonify(status="queued", command_uuid=command_uuid), 202
