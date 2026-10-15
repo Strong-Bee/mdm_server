@@ -1,10 +1,10 @@
 import base64
 import os
 import sqlite3
+import time
 
-from apns2.client import APNsClient
-from apns2.credentials import TokenCredentials
-from apns2.payload import Payload
+import httpx
+import jwt
 
 
 def _database_path():
@@ -17,24 +17,50 @@ def _database_path():
 def get_device_push_details(udid):
     conn = sqlite3.connect(_database_path())
     try:
-        row = conn.execute(
+        return conn.execute(
             "SELECT push_token, push_magic, push_topic FROM devices WHERE udid=?",
             (udid,),
         ).fetchone()
-        return row
     finally:
         conn.close()
 
 
-def send_apns_push(device_token, push_magic, team_id, key_id, auth_key_path, topic, use_sandbox=False):
+def send_apns_push(
+    device_token,
+    push_magic,
+    team_id,
+    key_id,
+    auth_key_path,
+    topic,
+    use_sandbox=False,
+):
     if not all([device_token, push_magic, team_id, key_id, auth_key_path, topic]):
         raise ValueError("APNs credentials, device token, PushMagic, and topic are required")
+    if not topic.startswith("com.apple.mgmt."):
+        raise ValueError("Apple MDM APNs topic must start with 'com.apple.mgmt.'")
 
-    credentials = TokenCredentials(auth_key_path, team_id, key_id)
-    client = APNsClient(credentials=credentials, use_sandbox=use_sandbox)
-    # Apple MDM push payload is {"mdm": PushMagic}; it is not an ordinary aps alert.
-    payload = Payload(custom={"mdm": push_magic})
-    client.send_notification(device_token, payload, topic)
+    with open(auth_key_path, "r", encoding="utf-8") as key_file:
+        private_key = key_file.read()
+
+    auth_token = jwt.encode(
+        {"iss": team_id, "iat": int(time.time())},
+        private_key,
+        algorithm="ES256",
+        headers={"kid": key_id},
+    )
+    host = "https://api.sandbox.push.apple.com" if use_sandbox else "https://api.push.apple.com"
+    url = f"{host}/3/device/{device_token.hex()}"
+    headers = {
+        "authorization": f"bearer {auth_token}",
+        "apns-topic": topic,
+        "apns-push-type": "mdm",
+    }
+    # Apple MDM uses only the custom mdm key, without an aps payload.
+    with httpx.Client(http2=True, timeout=10.0) as client:
+        response = client.post(url, headers=headers, json={"mdm": push_magic})
+    if response.status_code != 200:
+        reason = response.text[:500]
+        raise RuntimeError(f"APNs returned HTTP {response.status_code}: {reason}")
 
 
 def push_command_to_device(udid):
@@ -48,7 +74,11 @@ def push_command_to_device(udid):
     if not all([team_id, key_id, auth_key_path]):
         raise RuntimeError("Set APNS_TEAM_ID, APNS_KEY_ID, and APNS_AUTH_KEY_PATH")
 
-    token = base64.b64decode(details[0])
+    try:
+        token = base64.b64decode(details[0], validate=True)
+    except (ValueError, TypeError) as exc:
+        raise ValueError("Stored APNs device token is not valid base64") from exc
+
     use_sandbox = os.environ.get("APNS_USE_SANDBOX", "false").lower() == "true"
     send_apns_push(
         device_token=token,
