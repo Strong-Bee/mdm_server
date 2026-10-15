@@ -63,7 +63,8 @@ class MDMApiTests(unittest.TestCase):
             },
         )
         self.assertEqual(authenticate.status_code, 200)
-        self.assertEqual(plistlib.loads(authenticate.data), {})
+        # Apple check-in acknowledgements use an empty HTTP response body.
+        self.assertEqual(authenticate.data, b"")
 
         token_update = plist_request(
             self.client,
