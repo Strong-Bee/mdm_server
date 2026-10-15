@@ -31,11 +31,9 @@ export async function POST(
   } catch {
     return NextResponse.json({ error: "Body JSON tidak valid." }, { status: 400 });
   }
-  if (!input || typeof input.command_type !== "string" || !Array.isArray([])) {
-    // The backend remains the source of truth for the complete Apple command schema.
-    if (!input || typeof input.command_type !== "string") {
-      return NextResponse.json({ error: "command_type wajib diisi." }, { status: 400 });
-    }
+  // The backend remains the source of truth for the complete Apple command schema.
+  if (!input || typeof input.command_type !== "string") {
+    return NextResponse.json({ error: "command_type wajib diisi." }, { status: 400 });
   }
   if (input.payload !== undefined && (typeof input.payload !== "object" || input.payload === null || Array.isArray(input.payload))) {
     return NextResponse.json({ error: "payload harus berupa objek JSON." }, { status: 400 });
