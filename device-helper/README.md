@@ -6,6 +6,7 @@ This helper runs on the Windows/macOS/Linux computer physically connected to the
 
 - `GET /health`: helper status.
 - `GET /api/devices`: read-only USB discovery via `pymobiledevice3 usbmux list --usb`.
+- `GET /api/devices/<udid>/info`: read-only lockdown metadata from `pymobiledevice3 lockdown info`, with a strict field allowlist.
 - `POST /api/firmware/inspect`: reads an uploaded IPSW archive and reports BuildManifest metadata, product/build versions, supported product types, component names, file size and SHA-256. It does not extract or modify firmware components.
 
 No arbitrary command execution endpoint exists. The service binds to loopback by default.
