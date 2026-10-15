@@ -203,3 +203,77 @@ h1, h2, h3, p { margin-top: 0; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
 }
+
+
+/* Typed admin dashboard */
+.dashboard-shell { width: min(1120px, calc(100% - 44px)); margin: 0 auto; }
+.dashboard-header { min-height: 82px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
+.dashboard-back { color: #a0aec1; font-size: 11px; }
+.dashboard-back:hover { color: var(--mint); }
+.dashboard-intro { padding: 58px 0 30px; }
+.dashboard-intro h1 { margin: 17px 0 12px; font-size: clamp(38px,5vw,56px); letter-spacing: -.06em; line-height: 1.1; }
+.dashboard-intro h1 span { color: #7e9aba; }
+.dashboard-intro > p { max-width: 640px; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.8; }
+.dashboard-panel { margin-bottom: 17px; padding: 25px; border: 1px solid var(--line); border-radius: 13px; background: linear-gradient(145deg,rgba(18,34,54,.9),rgba(10,22,37,.86)); }
+.panel-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
+.panel-heading h2 { margin: 0 0 7px; font-size: 16px; letter-spacing: -.03em; }
+.panel-heading p { margin: 0; color: #8e9fb4; font-size: 11px; line-height: 1.7; }
+.connection-state { display: inline-flex; align-items: center; gap: 7px; flex-shrink: 0; padding: 7px 9px; color: #91a2b8; background: rgba(255,255,255,.025); border: 1px solid var(--line); border-radius: 6px; font: 8px 'DM Mono',monospace; letter-spacing: .04em; }
+.connection-state.is-connected { color: var(--mint); border-color: rgba(121,229,195,.24); }
+.token-form { margin-top: 23px; }
+.token-form label, .command-form label { display: block; margin-bottom: 8px; color: #cbd6e4; font-size: 10px; font-weight: 700; }
+.token-row { display: flex; gap: 9px; }
+.dashboard-shell input, .dashboard-shell select, .dashboard-shell textarea { width: 100%; min-width: 0; padding: 12px 13px; color: #e8eff9; background: #081321; border: 1px solid rgba(158,184,216,.2); border-radius: 7px; outline: none; font: 11px 'DM Mono',monospace; }
+.dashboard-shell input:focus, .dashboard-shell select:focus, .dashboard-shell textarea:focus { border-color: rgba(121,229,195,.65); box-shadow: 0 0 0 3px rgba(121,229,195,.07); }
+.dashboard-shell input::placeholder { color: #61748b; }
+.token-form small { display: block; margin-top: 10px; color: #73869e; font-size: 9px; line-height: 1.8; }
+.dashboard-shell .button { border: 1px solid transparent; white-space: nowrap; cursor: pointer; }
+.dashboard-shell .button:disabled { cursor: not-allowed; opacity: .5; }
+.dashboard-shell .button-secondary { border-color: rgba(165,190,222,.23); }
+.dashboard-alert { margin-bottom: 17px; padding: 13px 15px; border-radius: 8px; font-size: 11px; line-height: 1.7; overflow-wrap: anywhere; }
+.alert-error { color: #ffc5c5; border: 1px solid rgba(255,117,117,.25); background: rgba(116,32,42,.16); }
+.alert-success { color: #a5f4d9; border: 1px solid rgba(121,229,195,.25); background: rgba(30,105,83,.13); }
+.device-toolbar { margin: 20px 0 11px; }
+.device-toolbar input { max-width: 440px; }
+.empty-state { padding: 28px 10px; text-align: center; color: #8192a9; font-size: 11px; line-height: 1.8; }
+.device-list { border-top: 1px solid var(--line); }
+.device-row { display: grid; grid-template-columns: minmax(0,1fr) auto auto; align-items: center; gap: 20px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+.device-row:last-child { border-bottom: 0; }
+.device-row.selected { background: rgba(121,229,195,.025); }
+.device-summary { min-width: 0; display: flex; align-items: center; gap: 12px; }
+.device-avatar { width: 39px; height: 39px; flex-shrink: 0; display: grid; place-items: center; color: var(--mint); background: rgba(121,229,195,.07); border: 1px solid rgba(121,229,195,.18); border-radius: 10px; font-size: 22px; }
+.device-info { min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.device-info strong { font-size: 11px; }
+.device-info span { color: #8d9fb5; font-size: 9px; }
+.device-info code { overflow-wrap: anywhere; color: #637b96; font: 9px 'DM Mono',monospace; }
+.device-meta { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; color: #9aabc0; font-size: 9px; }
+.status { display: inline-flex; align-items: center; gap: 6px; padding: 5px 7px; border: 1px solid var(--line); border-radius: 5px; color: #a0aec1; font: 8px 'DM Mono',monospace; }
+.status::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: #8192a9; }
+.status-good { color: var(--mint); border-color: rgba(121,229,195,.2); }
+.status-good::before { background: var(--mint); }
+.status-muted { color: #8493a7; }
+.select-device { font-size: 9px !important; min-height: 35px; }
+.command-panel { margin-top: 17px; }
+.command-form { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 23px; }
+.command-form label { margin-top: 6px; }
+.command-form textarea { resize: vertical; line-height: 1.7; }
+.command-warning { margin: 2px 0 8px; padding: 12px; color: #d8bd8a; border: 1px solid rgba(216,189,138,.17); border-radius: 7px; background: rgba(120,86,31,.09); font-size: 10px; line-height: 1.8; }
+.command-form > .button { justify-self: start; }
+.dashboard-footer { padding: 20px 0 45px; color: #73869e; text-align: center; font-size: 9px; line-height: 1.8; }
+@media (max-width: 680px) {
+  .dashboard-shell { width: calc(100% - 30px); }
+  .dashboard-header { min-height: 69px; gap: 12px; }
+  .dashboard-back { font-size: 9px; text-align: right; }
+  .dashboard-intro { padding-top: 42px; }
+  .dashboard-intro h1 { font-size: 39px; }
+  .dashboard-panel { padding: 17px 14px; }
+  .panel-heading { gap: 12px; }
+  .panel-heading h2 { font-size: 14px; }
+  .connection-state { font-size: 7px; }
+  .token-row { flex-wrap: wrap; }
+  .token-row input { flex-basis: 100%; }
+  .token-row .button { flex: 1; }
+  .device-row { grid-template-columns: minmax(0,1fr) auto; gap: 10px; }
+  .device-meta { grid-column: 1; grid-row: 2; flex-direction: row; flex-wrap: wrap; padding-left: 51px; }
+  .select-device { grid-column: 2; grid-row: 1 / span 2; }
+}
