@@ -300,3 +300,29 @@ Buka `http://localhost:3000`. Untuk menghubungkan dashboard, masukkan token admi
 Import repository `Strong-Bee/mdm_server`, pilih **Next.js**, dan atur **Root Directory** ke `web`. Tambahkan environment variable `MDM_API_BASE_URL` yang menunjuk ke backend Flask melalui HTTPS.
 
 **Penting:** UI Next.js ini tidak menggantikan protokol MDM/APNs backend. Implementasi protokol inti masih berada di Python karena backend saat ini bergantung pada Flask, plistlib, SQLite, dan integrasi APNs. Frontend TypeScript berkomunikasi dengan API backend melalui route handler yang bertipe. Jangan menganggap deployment Vercel otomatis men-deploy backend, menyediakan penyimpanan persisten, atau menjadikan endpoint MDM aman untuk internet publik. Selesaikan validasi identitas perangkat, enrollment, keamanan token, dan pengujian terlebih dahulu.
+
+
+## iPhone Toolkit: local device helper
+
+The web dashboard is hosted separately from USB hardware. To discover an iPhone over USB or inspect an IPSW, run the local helper on the computer connected to the device.
+
+On Windows PowerShell, from the repository root:
+
+```powershell
+py -3.11 -m venv .venv-iphone
+.\\.venv-iphone\\Scripts\\Activate.ps1
+python -m pip install -r device-helper\\requirements.txt
+$env:IPHONE_HELPER_TOKEN = python -c "import secrets; print(secrets.token_urlsafe(32))"
+$env:IPHONE_HELPER_ALLOWED_ORIGINS = "https://mdm-server-ten.vercel.app,http://localhost:3000,http://127.0.0.1:3000"
+python device-helper\\app.py
+```
+
+Connect and unlock the iPhone, accept **Trust This Computer**, then verify the device CLI:
+
+```powershell
+pymobiledevice3 usbmux list --usb
+```
+
+Open `/tools/lab` on the dashboard, use `http://127.0.0.1:8787` as the helper URL, and enter the same token. The helper provides read-only USB discovery and metadata-only IPSW inspection. It does not expose arbitrary shell commands or extract/modify firmware components. Details and tests: [device-helper/README.md](device-helper/README.md).
+
+The helper is local-only by default. Do not expose port 8787 to the public internet. Browser private-network permissions and CORS settings may vary by browser/deployment origin. Automated tests mock USB discovery and do not substitute for testing with a connected physical iPhone.
